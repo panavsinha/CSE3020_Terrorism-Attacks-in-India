@@ -1,0 +1,102 @@
+---
+title: "<center><b>Prediction on Global Terrorism Database</b></center>"
+output: html_document
+---
+<pre>
+<b> Name: Sidhant Singh - 20BCE1625</b>
+<b>       Panav Sinha   - 20BCE1640</b>
+</pre>
+<br><br>
+
+```{r, warning=FALSE, message=FALSE}
+library(caTools)
+library(dplyr)
+library(e1071)
+library(ggplot2)
+library(party)
+library(magrittr)
+library(randomForest)
+```
+
+```{r}
+data = read.csv("globalterrorismdb_0617dist.csv")
+head(data)
+```
+
+```{r}
+index = c("nkill", "nwound", "success")
+data = data[index]
+data = na.omit(data)
+dim(data)
+head(data)
+```
+
+Apply the following classification algorithms to predict the target variable that yields 
+best performance by using 80/20 split.
+
+a) Decision Tree
+
+```{r}
+set.seed(30)
+split <- sample.split(data, SplitRatio = 0.8)
+train = subset(data, split == "TRUE")
+test = subset(data, split == "FALSE")
+dim(train)
+dim(test)
+```
+
+```{r}
+model <- ctree(success~., data=train)
+model
+```
+
+```{r}
+plot(model, main="Decision Tree Model")
+```
+
+```{r}
+pred = round(predict(model, test))
+```
+
+```{r}
+classerr <- mean(pred != test$success)
+print(paste("Accuracy = ", 1-classerr))
+```
+
+b) Random Forest Model
+
+```{r}
+model100 <- randomForest(success~., data, ntree = 100)
+model100
+```
+
+```{r}
+predict100 <- round(predict(model100, test))
+head(predict100)
+```
+
+```{r}
+acc100 <- mean(predict100 != test$success)
+print(paste('Accuracy =', 1 - acc100))
+```
+
+c) Logistic Regression
+
+```{r}
+model_lm = glm(success~., data=train)
+model_lm
+```
+
+```{r}
+predictlm <- round(predict(model_lm, test))
+head(predictlm)
+```
+
+```{r}
+acc_lm <- mean(predictlm != test$success)
+print(paste('Accuracy =', 1 - acc_lm))
+```
+
+```{r}
+plot(model_lm)
+```
